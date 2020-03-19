@@ -184,5 +184,98 @@ app.post('/home/pick_color', function(req, res) {
     });
 });
 
+app.get('/team_stats', function(req, res) {
+	var query = "select *, (case when home_score > visitor_score then 'CU_Boulder' else visitor_name end) as winner from football_games order by game_date;";
+	var won_query = "select count(*) as won from football_games where home_score > visitor_score";
+	var lost_query = "select count(*) as lost from football_games where home_score < visitor_score";
+	db.task('get-everything', task => {
+		return task.batch([
+			task.any(query),
+			task.any(won_query),
+			task.any(lost_query),
+		])
+	})
+        .then(data => {
+            res.render('pages/team_stats', {
+				my_title: "Team Stats",
+				result: data[0],
+				wonGames: data[1],
+				lostGames: data[2]
+			})
+
+        })
+        .catch(function (err) {
+            // display error message in case an error
+            console.log('error', err);
+            response.render('pages/team_stats', {
+                title: 'Team Stats',
+                result: '',
+                wonGames: '',
+		lostGames: ''
+            })
+        })
+
+});
+
+app.get('/player_info', function(req, res) {
+	var query = 'select * from football_players;';
+	db.any(query)
+        .then(function (rows) {
+            res.render('pages/player_info',{
+				my_title: "Player info",
+				players: rows,
+				chosen: null
+			})
+
+        })
+        .catch(function (err) {
+            // display error message in case an error
+            console.log('error', err);
+            response.render('pages/player_info', {
+                title: 'Player info',
+                data: '',
+                chosen:'',
+            })
+        })
+
+});
+
+app.get('/player_info/post', function(req, res) {
+  var id = req.query.player_choice;
+  var players = 'select * from football_players;';
+  var theOne = 'select * from football_players where id='+ id +';';
+  var games_played = 'SELECT count(*) from football_games where ' + id +' = ANY(players);'; 
+
+  db.task('get-everything', task => {
+        return task.batch([
+            task.any(players),
+            task.any(theOne),
+            task.any(games_played)
+        ]);
+    })
+    .then(data => {
+      
+      res.render('pages/player_info',{
+        my_title: "Player Info",
+        players: data[0],
+        chosen: data[1],
+        gamesPlayed: data[2][0].count
+      })
+    })
+        .catch(function (err) {
+            // display error message in case an error
+            console.log('error', err);
+            response.render('pages/player_info', {
+                title: 'Player info',
+                data: '',
+                chosen:'',
+            })
+        })
+
+});
+
+
+
+
 app.listen(3000);
 console.log('3000 is the magic port');

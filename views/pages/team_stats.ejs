@@ -26,6 +26,18 @@
 						that ran onload for Lab 5.  We are doing the same kind of operations we had in Lab 5, but we are instead having
 						everything handled via server-side scriptes
 			-->
+			<% for(var i = 0; i < result.length; i++){ %>
+				<tr> 	
+					
+					<td> <%= new Date(result[i].game_date).toDateString() %> </td>
+					<td> <%= result[i].visitor_name %> </td>
+					<td> <%= result[i].home_score %> </td>
+					<td> <%= result[i].visitor_score %> </td>
+					<td> <%= result[i].winner %> </td>
+				</tr>
+			<% } %>
+
+		
 			
 		</table>
 		<br>
@@ -36,9 +48,10 @@
 			</tr>
 			<tr>
 				<td> <!-- TODO: Display the total number of wins here.  
-							    This value should come from your server.js files query, don't calculate it in this file! --></td>
+							    This value should come from your server.js files query, don't calculate it in this file! -->
+				<%= wonGames[0].won %> </td>
 				<td> <!-- TODO: Display the total number of losses here.  
-							    This value should come from your server.js files query, don't calculate it in this file! --></td>
+							    This value should come from your server.js files query, don't calculate it in this file! --> <%= lostGames[0].lost %> </td>
 			</tr>
 		</table>
 		
